@@ -1,0 +1,7 @@
+name: AdvancedJail
+version: ${project.version}
+main: com.github.beastyboo.advancedjail.AJailPlugingin
+depend: [Vault]
+authors: [BeastyBoo, BeastCraft3]
+description: An advanced jail plugin.
+website: https://github.com/BeastyBoo
