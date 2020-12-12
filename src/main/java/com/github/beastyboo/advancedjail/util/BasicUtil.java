@@ -17,6 +17,19 @@ public class BasicUtil {
         throw new AssertionError();
     }
 
+    public static String formatTime(int total) {
+        int h = (total/3600);
+        int m = (total-(3600*h))/60;
+        int s = (total -(3600*h)-(m*60));
+        if(h > 0) {
+            return String.valueOf(h) + "h " + String.valueOf(m) + "m e " + String.valueOf(s) + "s.";
+        }
+        if(m > 0) {
+            return String.valueOf(m) + "m e " + String.valueOf(s) + "s.";
+        }
+        return String.valueOf(s) + "s.";
+    }
+
     public static boolean isPlayerInJail(World world, String regionID, Location loc) {
         RegionManager regions = WorldGuard.getInstance().getPlatform().getRegionContainer().get(BukkitAdapter.adapt(world));
 

@@ -1,16 +1,20 @@
 package com.github.beastyboo.advancedjail.config;
 
 import com.github.beastyboo.advancedjail.adapter.CellMemory;
+import com.github.beastyboo.advancedjail.adapter.CrimeMemory;
+import com.github.beastyboo.advancedjail.adapter.HandcuffMemory;
 import com.github.beastyboo.advancedjail.adapter.JailMemory;
 import com.github.beastyboo.advancedjail.application.AJail;
-import com.github.beastyboo.advancedjail.domain.entity.Cell;
-import com.github.beastyboo.advancedjail.domain.entity.Inmate;
-import com.github.beastyboo.advancedjail.domain.entity.Jail;
+import com.github.beastyboo.advancedjail.domain.entity.*;
 import com.github.beastyboo.advancedjail.domain.port.CellRepository;
+import com.github.beastyboo.advancedjail.domain.port.CrimeRepository;
+import com.github.beastyboo.advancedjail.domain.port.HandcuffRepository;
 import com.github.beastyboo.advancedjail.domain.port.JailRepository;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -23,14 +27,20 @@ public class JailConfiguration {
     private final AJail core;
     private final JailRepository jailRepository;
     private final CellRepository cellRepository;
+    private final HandcuffRepository handcuffRepository;
+    private final CrimeRepository crimeRepository;
 
     public JailConfiguration(AJail core) {
         this.core = core;
         jailRepository = new JailMemory(core);
         cellRepository = new CellMemory(core);
+        handcuffRepository = new HandcuffMemory(core);
+        crimeRepository = new CrimeMemory(core);
     }
 
     public void load() {
+        crimeRepository.load();
+        handcuffRepository.load();
         cellRepository.load();
         jailRepository.load();
     }
@@ -108,6 +118,60 @@ public class JailConfiguration {
 
     public Set<Cell> getAllCells() {
         return cellRepository.getAllCells();
+    }
+
+    //Handcuffs
+    public boolean addHandcuffTarget(Player player, Player target){
+        return handcuffRepository.addHandcuffTarget(player, target);
+    }
+
+    public boolean removeHandcuffTarget(Player player, Player target){
+        return handcuffRepository.removeHandcuffTarget(player, target);
+    }
+
+    public boolean giveHandcuff(Player player,  String name){
+        return handcuffRepository.giveHandcuff(player, name);
+    }
+
+    public boolean giveKey(Player player, String name){
+        return handcuffRepository.giveKey(player, name);
+    }
+
+    public Optional<Key> getKeyByName(String name){
+        return handcuffRepository.getKeyByName(name);
+    }
+
+    public Optional<Key> getKeyByItemStack(ItemStack itemStack){
+        return handcuffRepository.getKeyByItemStack(itemStack);
+    }
+
+    public Optional<Handcuff> getHandcuffByName(String name){
+        return handcuffRepository.getHandcuffByName(name);
+    }
+
+    public Optional<Handcuff> getHandcuffByItemStack(ItemStack itemStack){
+        return handcuffRepository.getHandcuffByItemStack(itemStack);
+    }
+
+    public Set<Key> getAllKeys(){
+        return handcuffRepository.getAllKeys();
+    }
+
+    public Set<Handcuff> getAllHandcuffs(){
+        return handcuffRepository.getAllHandcuffs();
+    }
+
+    public Map<UUID, Handcuff> getAllHandcuffedPlayers(){
+        return handcuffRepository.getAllHandcuffedPlayers();
+    }
+
+    //Crime
+    public boolean openArrestInventory(Player player, Player target, String jailName, String cellName) {
+        return crimeRepository.openArrestInventory(player, target, jailName, cellName);
+    }
+
+    public Optional<Crime> getCrimeByName(String name) {
+        return crimeRepository.getCrimeByName(name);
     }
 
     /**
