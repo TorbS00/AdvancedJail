@@ -1,4 +1,4 @@
-package com.github.beastyboo.advancedjail.adapter;
+package com.github.beastyboo.advancedjail.adapter.cached;
 
 import com.github.beastyboo.advancedjail.application.AJail;
 import com.github.beastyboo.advancedjail.domain.entity.Cell;

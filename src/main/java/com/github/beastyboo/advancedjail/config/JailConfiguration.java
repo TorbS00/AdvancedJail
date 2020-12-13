@@ -1,6 +1,6 @@
 package com.github.beastyboo.advancedjail.config;
 
-import com.github.beastyboo.advancedjail.adapter.*;
+import com.github.beastyboo.advancedjail.adapter.cached.*;
 import com.github.beastyboo.advancedjail.application.AJail;
 import com.github.beastyboo.advancedjail.domain.entity.*;
 import com.github.beastyboo.advancedjail.domain.port.*;
