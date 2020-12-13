@@ -5,43 +5,25 @@ import com.github.beastyboo.advancedjail.config.JailConfiguration;
 import com.github.beastyboo.advancedjail.domain.port.ConfigPort;
 import com.github.beastyboo.advancedjail.domain.port.MessagePort;
 import com.github.beastyboo.advancedjail.config.YamlPortConfiguration;
+import net.milkbowl.vault.economy.Economy;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.logging.Level;
 
 /**
  * Created by Torbie on 08.12.2020.
  */
 public class AJail {
 
+
     /**
      * TODO:
-     *
-     * 1. Jail (Create)
-     *
-     *  /Create
-     *  /Delete
-     *  /Jail list
-     *  /Create release-point.
-     *
-     *  createJail(name)
-     *  deleteJail(name)
-     *  getJail(Name)
-     *  getJail(Inmate)
-     *  jail-releaseTask.
-     *  createReleasePoint(player)
-     *  getCells
-     *  getPlayers
-     *
-     * 2. Cell (Create)
-     * createCell
-     * deleteCell
-     * getCell(Inmate)
-     * cellList
-     *
-     * 1. Handcuffed & Key. (Created in config) (In-game)
-     *
-     *
-     * 3. Arrest (Inmate object)
-     *
+     * Finish method(API) logics. InmateMemory left
+     * Event handlers
+     * Commands
+     * Message system
+     * Saving features, (Dazzle for YML and GSON for data)
      */
 
     private final JavaPlugin plugin;
@@ -51,6 +33,7 @@ public class AJail {
     private final JailConfiguration api;
     private ConfigPort config;
     private MessagePort message;
+    private Economy econ = null;
 
     public AJail(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -66,6 +49,13 @@ public class AJail {
         config = configManager.getConfigData();
         message = messageManager.getConfigData();
 
+        if (!setupEconomy() ) {
+            plugin.getLogger().severe(String.format("[%s] - Disabled due to no Vault dependency found!", plugin.getDescription().getName()));
+            plugin.getServer().getPluginManager().disablePlugin(plugin);
+            return;
+        }
+
+
         api.load();
         api.getJailRepository().releaseTask();
     }
@@ -74,6 +64,10 @@ public class AJail {
         api.close();
     }
 
+
+    public void log(String log) {
+        plugin.getLogger().log(Level.INFO, log);
+    }
 
     public JavaPlugin getPlugin() {
         return plugin;
@@ -89,5 +83,21 @@ public class AJail {
 
     public JailConfiguration getAPI() {
         return api;
+    }
+
+    private boolean setupEconomy() {
+        if (plugin.getServer().getPluginManager().getPlugin("Vault") == null) {
+            return false;
+        }
+        RegisteredServiceProvider<Economy> rsp = plugin.getServer().getServicesManager().getRegistration(Economy.class);
+        if (rsp == null) {
+            return false;
+        }
+        econ = rsp.getProvider();
+        return econ != null;
+    }
+
+    public Economy getEcon() {
+        return econ;
     }
 }

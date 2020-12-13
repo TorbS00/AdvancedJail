@@ -1,16 +1,11 @@
 package com.github.beastyboo.advancedjail.config;
 
-import com.github.beastyboo.advancedjail.adapter.CellMemory;
-import com.github.beastyboo.advancedjail.adapter.CrimeMemory;
-import com.github.beastyboo.advancedjail.adapter.HandcuffMemory;
-import com.github.beastyboo.advancedjail.adapter.JailMemory;
+import com.github.beastyboo.advancedjail.adapter.*;
 import com.github.beastyboo.advancedjail.application.AJail;
 import com.github.beastyboo.advancedjail.domain.entity.*;
-import com.github.beastyboo.advancedjail.domain.port.CellRepository;
-import com.github.beastyboo.advancedjail.domain.port.CrimeRepository;
-import com.github.beastyboo.advancedjail.domain.port.HandcuffRepository;
-import com.github.beastyboo.advancedjail.domain.port.JailRepository;
+import com.github.beastyboo.advancedjail.domain.port.*;
 import com.sk89q.worldedit.regions.CuboidRegion;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -29,6 +24,7 @@ public class JailConfiguration {
     private final CellRepository cellRepository;
     private final HandcuffRepository handcuffRepository;
     private final CrimeRepository crimeRepository;
+    private final InmateRepository inmateRepository;
 
     public JailConfiguration(AJail core) {
         this.core = core;
@@ -36,11 +32,13 @@ public class JailConfiguration {
         cellRepository = new CellMemory(core);
         handcuffRepository = new HandcuffMemory(core);
         crimeRepository = new CrimeMemory(core);
+        inmateRepository = new InmateMemory(core);
     }
 
     public void load() {
-        crimeRepository.load();
         handcuffRepository.load();
+        crimeRepository.load();
+        inmateRepository.load();
         cellRepository.load();
         jailRepository.load();
     }
@@ -48,6 +46,7 @@ public class JailConfiguration {
     public void close() {
         jailRepository.close();
         cellRepository.close();
+        inmateRepository.close();
     }
 
     //Jail
@@ -172,6 +171,39 @@ public class JailConfiguration {
 
     public Optional<Crime> getCrimeByName(String name) {
         return crimeRepository.getCrimeByName(name);
+    }
+
+    //Inmate
+    public boolean clickBillItem(Player player) {
+        return inmateRepository.clickBillItem(player);
+    }
+
+    public boolean clickBroadcastItem(Player player) {
+        return inmateRepository.clickBroadcastItem(player);
+    }
+
+    public boolean arrestPlayer(Player player, Player target, String jailName, String cellName, Set<Crime> selectedCrimes) {
+        return inmateRepository.arrestPlayer(player, target, jailName, cellName, selectedCrimes);
+    }
+
+    public boolean releasePlayer(Optional<CommandSender> sender, Player target) {
+        return inmateRepository.releasePlayer(sender, target);
+    }
+
+    public Optional<ItemStack> getBillItem(UUID uuid) {
+        return inmateRepository.getBillItem(uuid);
+    }
+
+    public Optional<ItemStack> getBroadcastItem(UUID uuid) {
+        return inmateRepository.getBroadcastItem(uuid);
+    }
+
+    public Optional<Inmate> getInmateByUUID(UUID uuid) {
+        return inmateRepository.getInmateByUUID(uuid);
+    }
+
+    public Set<Inmate> getAllInmates() {
+        return inmateRepository.getAllInmates();
     }
 
     /**

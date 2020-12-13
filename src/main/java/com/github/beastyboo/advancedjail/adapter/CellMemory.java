@@ -7,6 +7,7 @@ import com.github.beastyboo.advancedjail.domain.entity.Inmate;
 import com.github.beastyboo.advancedjail.domain.entity.Jail;
 import com.github.beastyboo.advancedjail.domain.port.CellRepository;
 import com.github.beastyboo.advancedjail.util.BasicUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -81,7 +82,13 @@ public class CellMemory implements CellRepository{
             return false;
         }
 
-        //TODO: release all players in cell.
+        for(Inmate inmate : cell.getPlayers().values()) {
+            Player pInmate = Bukkit.getPlayer(inmate.getUuid());
+            core.getAPI().releasePlayer(Optional.empty(), pInmate);
+        }
+
+        //TODO:
+        //  - delete file.
 
         jail.get().getCells().remove(cell.getName().toLowerCase(), cell);
         cells.remove(cell.getId(), cell);

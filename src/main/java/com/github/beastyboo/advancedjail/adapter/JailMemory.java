@@ -76,8 +76,12 @@ public class JailMemory implements JailRepository{
         }
 
         //TODO:
-        //  - Release all Players...
         //  - delete file.
+
+        for(Inmate inmate : jail.get().getPlayers().values()) {
+            Player pInmate = Bukkit.getPlayer(inmate.getUuid());
+            core.getAPI().releasePlayer(Optional.empty(), pInmate);
+        }
 
         RegionManager regions = WorldGuard.getInstance().getPlatform().getRegionContainer().get(BukkitAdapter.adapt(player.getWorld()));
         regions.removeRegion(jail.get().getName());
