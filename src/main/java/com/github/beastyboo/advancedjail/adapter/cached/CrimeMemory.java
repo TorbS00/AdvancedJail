@@ -74,6 +74,11 @@ public class CrimeMemory implements CrimeRepository{
         return Optional.ofNullable(loadedCrimes.get(name.toLowerCase()));
     }
 
+    @Override
+    public Set<Crime> getAllCrimes() {
+        return new HashSet<>(loadedCrimes.values());
+    }
+
     private void defaultInv(Inventory inventory) {
 
         inventory.clear();

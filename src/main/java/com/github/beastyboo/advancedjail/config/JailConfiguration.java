@@ -169,6 +169,8 @@ public class JailConfiguration {
         return crimeRepository.openArrestInventory(player, target, jailName, cellName);
     }
 
+    public Set<Crime> getAllCrimes() { return crimeRepository.getAllCrimes(); }
+
     public Optional<Crime> getCrimeByName(String name) {
         return crimeRepository.getCrimeByName(name);
     }
@@ -186,8 +188,8 @@ public class JailConfiguration {
         return inmateRepository.arrestPlayer(player, target, jailName, cellName, selectedCrimes);
     }
 
-    public boolean releasePlayer(Optional<CommandSender> sender, Player target) {
-        return inmateRepository.releasePlayer(sender, target);
+    public boolean releasePlayer(Optional<CommandSender> sender, Player target, boolean escaped) {
+        return inmateRepository.releasePlayer(sender, target, escaped);
     }
 
     public Optional<ItemStack> getBillItem(UUID uuid) {

@@ -11,6 +11,7 @@ import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -40,7 +41,16 @@ public class JailMemory implements JailRepository{
 
     @Override
     public void releaseTask() {
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(core.getPlugin(), () -> {
+            for(Inmate inmate : core.getAPI().getAllInmates()) {
+                if(inmate.getPenalty() != 0) {
+                    inmate.setPenalty(inmate.getPenalty() - 1);
+                    return;
+                }
 
+                core.getAPI().releasePlayer(Optional.of(core.getPlugin().getServer().getConsoleSender()), Bukkit.getPlayer(inmate.getUuid()), false);
+            }
+        }, 0L, 20L);
     }
 
     @Override
@@ -80,7 +90,7 @@ public class JailMemory implements JailRepository{
 
         for(Inmate inmate : jail.get().getPlayers().values()) {
             Player pInmate = Bukkit.getPlayer(inmate.getUuid());
-            core.getAPI().releasePlayer(Optional.empty(), pInmate);
+            core.getAPI().releasePlayer(Optional.empty(), pInmate, false);
         }
 
         RegionManager regions = WorldGuard.getInstance().getPlatform().getRegionContainer().get(BukkitAdapter.adapt(player.getWorld()));

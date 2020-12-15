@@ -25,7 +25,7 @@ public interface InmateRepository {
 
     boolean arrestPlayer(Player player, Player target, String jailName, String cellName, Set<Crime> selectedCrimes);
 
-    boolean releasePlayer(Optional<CommandSender> sender, Player target);
+    boolean releasePlayer(Optional<CommandSender> sender, Player target, boolean escaped);
 
     Optional<ItemStack> getBillItem(UUID uuid);
 

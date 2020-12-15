@@ -84,7 +84,7 @@ public class CellMemory implements CellRepository{
 
         for(Inmate inmate : cell.getPlayers().values()) {
             Player pInmate = Bukkit.getPlayer(inmate.getUuid());
-            core.getAPI().releasePlayer(Optional.empty(), pInmate);
+            core.getAPI().releasePlayer(Optional.empty(), pInmate, false);
         }
 
         //TODO:

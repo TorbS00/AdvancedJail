@@ -14,6 +14,7 @@ import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -77,7 +78,7 @@ public class InmateMemory implements InmateRepository {
         }
 
         econ.withdrawPlayer(player, bill);
-        this.releasePlayer(Optional.empty(), player);
+        this.releasePlayer(Optional.empty(), player, false);
         return true;
     }
 
@@ -154,6 +155,7 @@ public class InmateMemory implements InmateRepository {
             inv.addItem(broadcastItem.get());
         }
 
+
         Inmate newInmate = new Inmate(uuid, selectedCrimes, inv.getArmorContents(), inv.getContents(), getPenalty(selectedCrimes));
         inmates.put(uuid, newInmate);
 
@@ -175,10 +177,60 @@ public class InmateMemory implements InmateRepository {
     }
 
     @Override
-    public boolean releasePlayer(Optional<CommandSender> sender, Player target) {
+    public boolean releasePlayer(Optional<CommandSender> sender, Player target, boolean escaped) {
+        UUID uuid = target.getUniqueId();
+        PlayerInventory inv = target.getInventory();
+        Optional<Inmate> inmate = this.getInmateByUUID(uuid);
+        if(!inmate.isPresent()) {
+            //Inmate dont exist
+            return false;
+        }
+
+        JailConfiguration api = core.getAPI();
+
+        inv.clear();
+        inv.setArmorContents(inmate.get().getArmorContent());
+        inv.setContents(inmate.get().getInventoryContent());
+
+        Optional<Jail> jail = api.getJailByInmate(uuid);
+        Optional<Cell> cell = api.getCellByInmate(uuid);
+
+        if(!jail.isPresent()) {
+            //Jail dont exist
+            return false;
+        }
+
+        if(!cell.isPresent()) {
+            //Cell dont exist
+            return false;
+        }
+
+        cell.get().getPlayers().remove(uuid, inmate.get());
+        jail.get().getPlayers().remove(uuid, inmate.get());
+        inmates.remove(uuid, inmate.get());
+
+        if(target.isOnline()) {
+            target.teleport(jail.get().getReleasePoint());
+            //Release message
+        }
 
         //TODO:
         //  - delete file.
+        //  - PlayerJoinEvent -> if is not inmate anymore, teleport to spawn.
+
+        if(sender.isPresent()) {
+            if(sender.get() instanceof Player) {
+                //Released target message
+            }
+
+            else if(sender.get() instanceof ConsoleCommandSender) {
+                //Broadcast message
+            }
+        }
+
+        if(escaped) {
+            //broadcast escaped.
+        }
 
         return false;
     }
