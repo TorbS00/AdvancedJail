@@ -1,11 +1,20 @@
 package com.github.beastyboo.advancedjail.application;
 
 import co.aikar.commands.PaperCommandManager;
+import com.github.beastyboo.advancedjail.adapter.command.CmdArrest;
+import com.github.beastyboo.advancedjail.adapter.command.CmdCell;
+import com.github.beastyboo.advancedjail.adapter.command.CmdJail;
+import com.github.beastyboo.advancedjail.adapter.command.CmdRelease;
 import com.github.beastyboo.advancedjail.config.JailConfiguration;
+import com.github.beastyboo.advancedjail.domain.MessageType;
 import com.github.beastyboo.advancedjail.domain.port.ConfigPort;
 import com.github.beastyboo.advancedjail.domain.port.MessagePort;
 import com.github.beastyboo.advancedjail.config.YamlPortConfiguration;
+import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -19,9 +28,6 @@ public class AJail {
 
     /**
      * TODO:
-     * Finish method(API) logics. InmateMemory left
-     * Event handlers
-     * Commands
      * Message system
      * Saving features, (Dazzle for YML and GSON for data)
      */
@@ -54,6 +60,8 @@ public class AJail {
             plugin.getServer().getPluginManager().disablePlugin(plugin);
             return;
         }
+
+        this.registerCommands(manager);
 
 
         api.load();
@@ -97,7 +105,34 @@ public class AJail {
         return econ != null;
     }
 
+    private void registerCommands(PaperCommandManager manager) {
+        manager.enableUnstableAPI("help");
+
+        manager.registerCommand(new CmdJail(this));
+        manager.registerCommand(new CmdCell(this));
+        manager.registerCommand(new CmdArrest(this));
+        manager.registerCommand(new CmdRelease(this));
+
+        manager.setDefaultExceptionHandler((command, registeredCommand, sender, args, t) -> {
+            plugin.getLogger().warning("Error occured while executing command: " + command.getName());
+            return false;
+        });
+    }
+
+    public void message(Player player, MessageType type) {
+        player.sendMessage(ChatColor.translateAlternateColorCodes('&', message.messages().get(type)));
+    }
+
+    public void broadcast(MessageType type) {
+        Bukkit.broadcast(ChatColor.translateAlternateColorCodes('&', message.messages().get(type)), "jail.broadcast.release");
+    }
+
     public Economy getEcon() {
         return econ;
     }
+
+    public WorldEditPlugin getWorldEdit() {
+        return (WorldEditPlugin) Bukkit.getPluginManager().getPlugin("WorldEdit");
+    }
+
 }

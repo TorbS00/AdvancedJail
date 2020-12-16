@@ -2,6 +2,7 @@ package com.github.beastyboo.advancedjail.adapter.cached;
 
 import com.github.beastyboo.advancedjail.application.AJail;
 import com.github.beastyboo.advancedjail.config.JailConfiguration;
+import com.github.beastyboo.advancedjail.domain.MessageType;
 import com.github.beastyboo.advancedjail.domain.entity.Cell;
 import com.github.beastyboo.advancedjail.domain.entity.Crime;
 import com.github.beastyboo.advancedjail.domain.entity.Inmate;
@@ -55,25 +56,23 @@ public class InmateMemory implements InmateRepository {
     public boolean clickBillItem(Player player) {
         Optional<Inmate> inmate = this.getInmateByUUID(player.getUniqueId());
         if(!inmate.isPresent()) {
-            //not an inmate...
+            core.message(player, MessageType.INMATE_NOT_FOUND);
             return false;
         }
 
         Optional<ItemStack> billItem = this.getBillItem(player.getUniqueId());
         if(!billItem.isPresent()) {
-            //Could not load billItem item for player.
             return false;
         }
 
         if(!player.getInventory().getItemInMainHand().isSimilar(billItem.get())) {
-            //Did not click billItem item.
             return false;
         }
 
         Economy econ = core.getEcon();
         double bill = inmate.get().getBill();
         if(econ.getBalance(player) < bill) {
-            //Not enough money
+            core.message(player, MessageType.INMATE_NOT_ENOUGH_MONEY);
             return false;
         }
 
@@ -86,23 +85,21 @@ public class InmateMemory implements InmateRepository {
     public boolean clickBroadcastItem(Player player) {
         Optional<Inmate> inmate = this.getInmateByUUID(player.getUniqueId());
         if(!inmate.isPresent()) {
-            //not an inmate...
+            core.message(player, MessageType.INMATE_NOT_FOUND);
             return false;
         }
 
         Optional<ItemStack> broadcastItem = this.getBroadcastItem(player.getUniqueId());
         if(!broadcastItem.isPresent()) {
-            //Could not load broadcast item for player.
             return false;
         }
 
         if(!player.getInventory().getItemInMainHand().isSimilar(broadcastItem.get())) {
-            //Did not click broadcast item.
             return false;
         }
 
         if(cachedCooldown.getIfPresent(player.getUniqueId()) != null) {
-            //Still in cooldown.
+            core.message(player, MessageType.INMATE_STILL_IN_COOLDOWN);
 
             return false;
         }
@@ -111,12 +108,12 @@ public class InmateMemory implements InmateRepository {
 
         //TODO: Optimize permission...
         for(Player all : Bukkit.getOnlinePlayers()) {
-            if(all.hasPermission("jail.broadcast")) {
-                //Broadcast a message to everyyone
+            if(all.hasPermission("jail.broadcast.inmate")) {
+                core.message(all, MessageType.INMATE_BROADCAST_ITEM_USED);
             }
         }
 
-        //broadcast sent...
+        core.message(player, MessageType.INMATE_BROADCAST_SENT);
         return true;
     }
 
@@ -125,7 +122,7 @@ public class InmateMemory implements InmateRepository {
         UUID uuid = target.getUniqueId();
         Optional<Inmate> inmate = this.getInmateByUUID(uuid);
         if(inmate.isPresent()) {
-            //Inmate already exist
+            core.message(player, MessageType.INMATE_ALREADY_EXIST);
             return false;
         }
 
@@ -133,13 +130,13 @@ public class InmateMemory implements InmateRepository {
 
         Optional<Jail> jail = api.getJailByName(jailName);
         if(!jail.isPresent()) {
-            //Jail dont exist
+            core.message(player, MessageType.JAIL_NOT_FOUND);
             return false;
         }
 
         Optional<Cell> cell = api.getCellByJailAndName(jailName, cellName);
         if(!cell.isPresent()) {
-            //Cell dont exist
+            core.message(player, MessageType.CELL_NOT_FOUND);
             return false;
         }
 
@@ -172,7 +169,8 @@ public class InmateMemory implements InmateRepository {
 
         player.getInventory().addItem(this.playerArrestBook(newInmate, target, jail.get(), cell.get()));
 
-        //Message to BOTH: PLAYER ARRESTED...
+        core.message(player, MessageType.PLAYER_ARREST);
+        core.message(target, MessageType.TARGET_ARREST);
         return true;
     }
 
@@ -182,7 +180,11 @@ public class InmateMemory implements InmateRepository {
         PlayerInventory inv = target.getInventory();
         Optional<Inmate> inmate = this.getInmateByUUID(uuid);
         if(!inmate.isPresent()) {
-            //Inmate dont exist
+            if(sender.isPresent()) {
+                if(sender.get() instanceof Player) {
+                    core.message((Player) sender.get(), MessageType.INMATE_NOT_FOUND);
+                }
+            }
             return false;
         }
 
@@ -196,12 +198,10 @@ public class InmateMemory implements InmateRepository {
         Optional<Cell> cell = api.getCellByInmate(uuid);
 
         if(!jail.isPresent()) {
-            //Jail dont exist
             return false;
         }
 
         if(!cell.isPresent()) {
-            //Cell dont exist
             return false;
         }
 
@@ -211,7 +211,7 @@ public class InmateMemory implements InmateRepository {
 
         if(target.isOnline()) {
             target.teleport(jail.get().getReleasePoint());
-            //Release message
+            core.message(target, MessageType.TARGET_RELEASE);
         }
 
         //TODO:
@@ -220,16 +220,20 @@ public class InmateMemory implements InmateRepository {
 
         if(sender.isPresent()) {
             if(sender.get() instanceof Player) {
-                //Released target message
+                core.message((Player) sender.get(), MessageType.PLAYER_RELEASE);
             }
 
             else if(sender.get() instanceof ConsoleCommandSender) {
-                //Broadcast message
+                core.broadcast(MessageType.INMATE_RELEASE_BROADCAST);
             }
         }
 
         if(escaped) {
-            //broadcast escaped.
+            for(Player pl : Bukkit.getOnlinePlayers()) {
+                if(pl.hasPermission("jail.broadcast.escape")) {
+                    core.message(pl, MessageType.INMATE_ESCAPE_BROADCAST);
+                }
+            }
         }
 
         return false;

@@ -1,6 +1,7 @@
 package com.github.beastyboo.advancedjail.adapter.cached;
 
 import com.github.beastyboo.advancedjail.application.AJail;
+import com.github.beastyboo.advancedjail.domain.MessageType;
 import com.github.beastyboo.advancedjail.domain.entity.Cell;
 import com.github.beastyboo.advancedjail.domain.entity.Crime;
 import com.github.beastyboo.advancedjail.domain.entity.Jail;
@@ -41,22 +42,22 @@ public class CrimeMemory implements CrimeRepository{
         Optional<Cell> cell = core.getAPI().getCellByJailAndName(jailName, cellName);
 
         if(!jail.isPresent()) {
-            //Could not find jail
+            core.message(player, MessageType.JAIL_NOT_FOUND);
             return false;
         }
 
         if(!cell.isPresent()) {
-            //Could not find cell
+            core.message(player, MessageType.CELL_NOT_FOUND);
             return false;
         }
 
         if(cell.get().getPlayers().size() >= cell.get().getLimit()) {
-            //Cell is full
+            core.message(player, MessageType.CELL_IS_FULL);
             return false;
         }
 
         if(core.getAPI().getJailByInmate(target.getUniqueId()).isPresent()) {
-            //Player already belongs to a jail
+            core.message(player, MessageType.INMATE_ALREADY_EXIST);
             return false;
         }
 

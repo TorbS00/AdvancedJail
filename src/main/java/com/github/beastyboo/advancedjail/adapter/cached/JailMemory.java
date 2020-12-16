@@ -1,6 +1,7 @@
 package com.github.beastyboo.advancedjail.adapter.cached;
 
 import com.github.beastyboo.advancedjail.application.AJail;
+import com.github.beastyboo.advancedjail.domain.MessageType;
 import com.github.beastyboo.advancedjail.domain.entity.Cell;
 import com.github.beastyboo.advancedjail.domain.entity.Inmate;
 import com.github.beastyboo.advancedjail.domain.entity.Jail;
@@ -57,7 +58,7 @@ public class JailMemory implements JailRepository{
     public boolean createJail(String name, Player player, CuboidRegion region) {
         Optional<Jail> jail = this.getJailByName(name);
         if(jail.isPresent()) {
-            //Jail already exist.
+            core.message(player, MessageType.JAIL_ALREADY_EXIST);
             return false;
         }
 
@@ -65,7 +66,7 @@ public class JailMemory implements JailRepository{
         RegionManager regions = WorldGuard.getInstance().getPlatform().getRegionContainer().get(region.getWorld());
 
         if(regions.getRegions().containsKey(name)) {
-            //Already exist a region with jail name...
+            core.message(player, MessageType.JAIL_REGIONNAME_ALREADY_EXIST);
             return false;
         }
 
@@ -73,7 +74,7 @@ public class JailMemory implements JailRepository{
 
         Jail newJail = new Jail.Builder(name).releasePoint(player.getWorld().getSpawnLocation()).build();
         jails.put(newJail.getName().toLowerCase(), newJail);
-        //Jail created.
+        core.message(player, MessageType.JAIL_CREATED);
         return true;
     }
 
@@ -81,7 +82,7 @@ public class JailMemory implements JailRepository{
     public boolean deleteJail(String name, Player player) {
         Optional<Jail> jail = this.getJailByName(name);
         if(!jail.isPresent()) {
-            //Jail dont exist.
+            core.message(player, MessageType.JAIL_NOT_FOUND);
             return false;
         }
 
@@ -97,7 +98,7 @@ public class JailMemory implements JailRepository{
         regions.removeRegion(jail.get().getName());
 
         jails.remove(jail.get().getName().toLowerCase(), jail.get());
-        //Jail deleted.
+        core.message(player, MessageType.JAIL_DELETED);
         return true;
     }
 
@@ -105,19 +106,19 @@ public class JailMemory implements JailRepository{
     public boolean createReleasePoint(String name, Player player) {
         Optional<Jail> jail = this.getJailByName(name);
         if(!jail.isPresent()) {
-            //Jail dont exist.
+            core.message(player, MessageType.JAIL_NOT_FOUND);
             return false;
         }
 
         jail.get().setReleasePoint(player.getLocation());
-        //releasePoint created.
+        core.message(player, MessageType.JAIL_RELEASE_POINT_CREATED);
         return true;
     }
 
     @Override
     public boolean sendJailList(Player player) {
         if(jails.size() <= 0) {
-            //No jail exist
+            core.message(player, MessageType.JAIL_LIST_EMPTY);
             return false;
         }
         player.sendMessage("§6Jails:");
@@ -131,12 +132,12 @@ public class JailMemory implements JailRepository{
     public boolean sendCellsList(String name, Player player) {
         Optional<Jail> jail = this.getJailByName(name);
         if(!jail.isPresent()) {
-            //Jail dont exist.
+            core.message(player, MessageType.JAIL_NOT_FOUND);
             return false;
         }
 
         if(jail.get().getCells().size() <= 0) {
-            //No cells in jail.
+            core.message(player, MessageType.JAIL_CELL_LIST_EMPTY);
             return false;
         }
 
@@ -155,12 +156,12 @@ public class JailMemory implements JailRepository{
     public boolean sendInmateList(String name, Player player) {
         Optional<Jail> jail = this.getJailByName(name);
         if(!jail.isPresent()) {
-            //Jail dont exist.
+            core.message(player, MessageType.JAIL_NOT_FOUND);
             return false;
         }
 
         if(jail.get().getPlayers().size() <= 0) {
-            //No Players in jail.
+            core.message(player, MessageType.JAIL_INMATE_LIST_EMPTY);
             return false;
         }
 

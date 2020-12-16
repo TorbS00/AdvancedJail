@@ -1,6 +1,7 @@
 package com.github.beastyboo.advancedjail.adapter.cached;
 
 import com.github.beastyboo.advancedjail.application.AJail;
+import com.github.beastyboo.advancedjail.domain.MessageType;
 import com.github.beastyboo.advancedjail.domain.entity.Handcuff;
 import com.github.beastyboo.advancedjail.domain.entity.Key;
 import com.github.beastyboo.advancedjail.domain.port.HandcuffRepository;
@@ -46,12 +47,11 @@ public class HandcuffMemory implements HandcuffRepository{
 
         Optional<Handcuff> handcuff = this.getHandcuffByItemStack(itemInMainHand);
         if(!handcuff.isPresent()) {
-            //Handcuff not found
             return false;
         }
 
         if(handcuffedPlayers.containsKey(target.getUniqueId())) {
-            //Player already handcuffed....
+            core.message(player, MessageType.PLAYER_ALREADY_HANDCUFFED);
             return false;
         }
 
@@ -70,7 +70,8 @@ public class HandcuffMemory implements HandcuffRepository{
         }
 
         target.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, Integer.MAX_VALUE, 2));
-        //BOTH TARGET AND PLAYER MESSAGE: Handcuffs added!!
+        core.message(player, MessageType.PLAYER_HANDCUFFED_ADDED);
+        core.message(target, MessageType.TARGET_HANDCUFF_ADDED);
         return true;
     }
 
@@ -81,19 +82,18 @@ public class HandcuffMemory implements HandcuffRepository{
 
         Optional<Key> key = this.getKeyByItemStack(itemInMainHand);
         if(!key.isPresent()) {
-            //key not found
             return false;
         }
 
         if(!handcuffedPlayers.containsKey(target.getUniqueId())) {
-            //Player not handcuffed....
+            core.message(player, MessageType.PLAYER_NOT_HANDCUFFED);
             return false;
         }
 
         Handcuff handcuff = handcuffedPlayers.get(target.getUniqueId());
 
         if(!handcuff.getKey().equals(key.get()) || !key.get().isPincer()) {
-            //Wrong key!
+            core.message(player, MessageType.PLAYER_WRONG_KEY);
             return false;
         }
 
@@ -110,7 +110,8 @@ public class HandcuffMemory implements HandcuffRepository{
 
         Bukkit.getScheduler().scheduleSyncDelayedTask(core.getPlugin(), () -> handcuffedPlayers.remove(target.getUniqueId(), handcuff), 10L);
 
-        //BOTH TARGET AND PLAYER MESSAGE: Handcuffs removed!!
+        core.message(player, MessageType.PLAYER_HANDCUFFED_REMOVED);
+        core.message(target, MessageType.TARGET_HANDCUFF_REMOVED);
         return true;
     }
 
@@ -118,12 +119,12 @@ public class HandcuffMemory implements HandcuffRepository{
     public boolean giveHandcuff(Player player, String name) {
         Optional<Handcuff> handcuff = this.getHandcuffByName(name);
         if(!handcuff.isPresent()) {
-            //Handcuff not found
+            core.message(player, MessageType.HANDCUFF_NOT_FOUND);
             return false;
         }
 
         player.getInventory().addItem(handcuff.get().getItemStack());
-        //Give handcuff
+        core.message(player, MessageType.HANDCUFF_GIVEN);
         return true;
     }
 
@@ -131,12 +132,12 @@ public class HandcuffMemory implements HandcuffRepository{
     public boolean giveKey(Player player, String name) {
         Optional<Key> key = this.getKeyByName(name);
         if(!key.isPresent()) {
-            //key not found
+            core.message(player, MessageType.KEY_NOT_FOUND);
             return false;
         }
 
         player.getInventory().addItem(key.get().getItemStack());
-        //Give key
+        core.message(player, MessageType.KEY_GIVEN);
         return true;
     }
 

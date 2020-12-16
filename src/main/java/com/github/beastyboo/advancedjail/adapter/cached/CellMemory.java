@@ -2,6 +2,7 @@ package com.github.beastyboo.advancedjail.adapter.cached;
 
 import com.github.beastyboo.advancedjail.application.AJail;
 import com.github.beastyboo.advancedjail.config.JailConfiguration;
+import com.github.beastyboo.advancedjail.domain.MessageType;
 import com.github.beastyboo.advancedjail.domain.entity.Cell;
 import com.github.beastyboo.advancedjail.domain.entity.Inmate;
 import com.github.beastyboo.advancedjail.domain.entity.Jail;
@@ -41,22 +42,22 @@ public class CellMemory implements CellRepository{
     public boolean createCell(String jailName, String name, Player player, int size) {
         Optional<Jail> jail = api.getJailByName(jailName);
         if(!jail.isPresent()) {
-            //Jail dont exist
+            core.message(player, MessageType.JAIL_NOT_FOUND);
             return false;
         }
 
         if(jail.get().getCells().get(name.toLowerCase()) != null) {
-            //Cell name already exist in jail.
+            core.message(player, MessageType.CELL_NAME_TAKEN);
             return false;
         }
 
         if(size <= 0) {
-            //Number too small...
+            core.message(player, MessageType.CELL_SIZE_INVALID);
             return false;
         }
 
         if(BasicUtil.isPlayerInJail(player.getWorld(), jail.get().getName(), player.getLocation()) == false) {
-            //Outside jail area.
+            core.message(player, MessageType.PLAYER_OUTSIDE_CELL);
             return false;
         }
 
@@ -64,7 +65,7 @@ public class CellMemory implements CellRepository{
         Cell cell = new Cell(UUID.randomUUID(), name, player.getLocation(), size, players);
         jail.get().getCells().put(cell.getName().toLowerCase(), cell);
         cells.put(cell.getId(), cell);
-        //cell created.
+        core.message(player, MessageType.CELL_CREATED);
         return true;
     }
 
@@ -72,13 +73,13 @@ public class CellMemory implements CellRepository{
     public boolean deleteCell(String jailName, String name, Player player) {
         Optional<Jail> jail = api.getJailByName(jailName);
         if(!jail.isPresent()) {
-            //Jail dont exist
+            core.message(player, MessageType.JAIL_NOT_FOUND);
             return false;
         }
 
         Cell cell = jail.get().getCells().get(name.toLowerCase());
         if(cell == null) {
-            //Cell name dont exist in jail.
+            core.message(player, MessageType.CELL_NOT_FOUND);
             return false;
         }
 
@@ -92,7 +93,7 @@ public class CellMemory implements CellRepository{
 
         jail.get().getCells().remove(cell.getName().toLowerCase(), cell);
         cells.remove(cell.getId(), cell);
-        //Cell deleted
+        core.message(player, MessageType.CELL_DELETED);
         return true;
     }
 
