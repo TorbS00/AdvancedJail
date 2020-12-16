@@ -25,11 +25,13 @@ import java.util.logging.Level;
  */
 public class AJail {
 
-
     /**
      * TODO:
-     * Message system
      * Saving features, (Dazzle for YML and GSON for data)
+     *
+     * GSON: Cell, Inmate, Jail.
+     * SNAKEYAML: Crime, Handcuff, Key, Inmate -> Broadcast and Bill item...
+     *
      */
 
     private final JavaPlugin plugin;
@@ -62,7 +64,6 @@ public class AJail {
         }
 
         this.registerCommands(manager);
-
 
         api.load();
         api.getJailRepository().releaseTask();
