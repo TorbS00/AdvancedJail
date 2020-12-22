@@ -48,15 +48,14 @@ public class AJail {
         manager = new PaperCommandManager(plugin);
         configManager = YamlPortConfiguration.create(plugin.getDataFolder().toPath(), "config.yml", ConfigPort.class);
         messageManager = YamlPortConfiguration.create(plugin.getDataFolder().toPath(), "message.yml", MessagePort.class);
-        api = new JailConfiguration(this);
-    }
-
-    void load() {
         configManager.reloadConfig();
         messageManager.reloadConfig();
         config = configManager.getConfigData();
         message = messageManager.getConfigData();
+        api = new JailConfiguration(this);
+    }
 
+    void load() {
         if (!setupEconomy() ) {
             plugin.getLogger().severe(String.format("[%s] - Disabled due to no Vault dependency found!", plugin.getDescription().getName()));
             plugin.getServer().getPluginManager().disablePlugin(plugin);

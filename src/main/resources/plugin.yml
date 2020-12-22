@@ -1,7 +1,8 @@
 name: AdvancedJail
 version: ${project.version}
-main: com.github.beastyboo.advancedjail.AJailPlugingin
-depend: [Vault]
+main: com.github.beastyboo.advancedjail.application.AJailPlugin
+depend: [WorldEdit, WorldGuard, WorldGuardEvents, Vault]
 authors: [BeastyBoo, BeastCraft3]
 description: An advanced jail plugin.
 website: https://github.com/BeastyBoo
+api-version: 1.15

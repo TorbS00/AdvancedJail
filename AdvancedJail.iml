@@ -33,8 +33,8 @@
     <orderEntry type="library" scope="PROVIDED" name="Maven: junit:junit:4.10" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.hamcrest:hamcrest-core:1.1" level="project" />
     <orderEntry type="library" name="Maven: co.aikar:acf-paper:0.5.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: space.arim.dazzleconf:dazzleconf-ext-snakeyaml:1.1.0" level="project" />
-    <orderEntry type="library" name="Maven: space.arim.dazzleconf:dazzleconf-core:1.1.0" level="project" />
+    <orderEntry type="library" name="Maven: space.arim.dazzleconf:dazzleconf-ext-snakeyaml:1.2.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: space.arim.dazzleconf:dazzleconf-core:1.2.0-SNAPSHOT" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.sk89q.worldedit:worldedit-bukkit:7.2.0-SNAPSHOT" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.sk89q.worldedit:worldedit-core:7.2.0-SNAPSHOT" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.sk89q.worldedit.worldedit-libs:core:7.2.0-SNAPSHOT" level="project" />

@@ -43,7 +43,6 @@ public class ArrestInventoryHolder implements InventoryHolder {
         return selectedCrimes;
     }
 
-
     @Override
     public Inventory getInventory() {
         return this.getInventory();
