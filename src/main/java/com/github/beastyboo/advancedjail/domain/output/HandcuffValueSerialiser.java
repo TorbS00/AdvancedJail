@@ -27,7 +27,7 @@ public class HandcuffValueSerialiser implements ValueSerialiser<Handcuff>{
         Map<String, FlexibleType> map = new HashMap<>();
 
         for(Map.Entry<FlexibleType, FlexibleType> mapEntry : flexibleType.getMap().entrySet()) {
-            map.put(mapEntry.getKey().toString(), mapEntry.getValue());
+            map.put(mapEntry.getKey().getString(), mapEntry.getValue());
         }
 
         FlexibleType name = map.get("name");
