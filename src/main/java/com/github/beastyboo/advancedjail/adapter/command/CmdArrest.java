@@ -6,6 +6,8 @@ import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import com.github.beastyboo.advancedjail.application.AJail;
 import org.bukkit.entity.Player;
 
+import java.util.Random;
+
 /**
  * Created by Torbie on 16.12.2020.
  */
