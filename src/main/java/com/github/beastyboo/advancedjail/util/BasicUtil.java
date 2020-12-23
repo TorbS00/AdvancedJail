@@ -141,6 +141,7 @@ public class BasicUtil {
         List<String> lore = new ArrayList<>();
         lore.add(ChatColor.GOLD + String.valueOf("Test"));
         meta.setLore(lore);
+        meta.setCustomModelData(1);
         item.setItemMeta(meta);
         return item;
     }
@@ -152,6 +153,7 @@ public class BasicUtil {
         List<String> lore = new ArrayList<>();
         lore.add(ChatColor.GOLD + String.valueOf("Test"));
         meta.setLore(lore);
+        meta.setCustomModelData(1);
         item.setItemMeta(meta);
         return item;
     }
@@ -171,12 +173,31 @@ public class BasicUtil {
     }
 
     public static Key defaultKey() {
-        return new Key("key", "In-game key", "jail.key.key", false, new ItemStack(Material.BELL, 1));
+        ItemStack is = new ItemStack(Material.BELL, 1);
+        ItemMeta meta = is.getItemMeta();
+        meta.setDisplayName("In-game key");
+        List<String> lore = new ArrayList<>();
+        lore.add("test!!!!");
+        lore.add("yay test again.");
+        meta.setLore(lore);
+        meta.setCustomModelData(1);
+        is.setItemMeta(meta);
+        return new Key("key", "In-game key", "jail.key.key", false, is);
     }
 
     public static Map<String, Handcuff> defaultHandcuffs() {
+        ItemStack is = new ItemStack(Material.BLAZE_ROD, 1);
+        ItemMeta meta = is.getItemMeta();
+        meta.setDisplayName("In-game handcuff");
+        List<String> lore = new ArrayList<>();
+        lore.add("test!!!!");
+        lore.add("yay test again.");
+        meta.setLore(lore);
+        meta.setCustomModelData(1);
+        is.setItemMeta(meta);
+
         Map<String, Handcuff> handcuffs = new HashMap<>();
-        Handcuff handcuff = new Handcuff("handcuff", "In-game handcuff", "jail.handcuff.handcuff", new ItemStack(Material.BLAZE_ROD, 1), true, defaultKey());
+        Handcuff handcuff = new Handcuff("handcuff", "In-game handcuff", "jail.handcuff.handcuff", is, true, defaultKey());
         handcuffs.put("handcuff", handcuff);
         return handcuffs;
     }

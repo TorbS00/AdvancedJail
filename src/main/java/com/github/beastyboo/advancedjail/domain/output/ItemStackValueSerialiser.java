@@ -32,8 +32,9 @@ public class ItemStackValueSerialiser implements ValueSerialiser<ItemStack>{
             map.put(mapEntry.getKey().toString(), mapEntry.getValue());
         }
 
-        FlexibleType name = map.get("display-name");
+        FlexibleType name = map.get("item-name");
         FlexibleType material = map.get("material");
+        FlexibleType modelData = map.get("model-data");
         FlexibleType lore = map.get("lore");
 
         if (name == null || material == null) {
@@ -51,6 +52,7 @@ public class ItemStackValueSerialiser implements ValueSerialiser<ItemStack>{
 
             meta.setLore(newList);
         }
+        meta.setCustomModelData(modelData.getInteger());
         itemStack.setItemMeta(meta);
 
         return itemStack;
@@ -59,9 +61,15 @@ public class ItemStackValueSerialiser implements ValueSerialiser<ItemStack>{
     @Override
     public Object serialise(ItemStack value, Decomposer decomposer) {
         Map<String, Object> map = new HashMap<>();
-        map.put("display-name", value.getItemMeta().getDisplayName());
+        map.put("item-name", value.getItemMeta().getDisplayName());
         map.put("material", value.getType().toString());
-        map.put("lore", value.getItemMeta().getLore());
+        ItemMeta meta = value.getItemMeta();
+        map.put("model-data", meta.getCustomModelData());
+        if(meta.getLore() == null) {
+            map.put("lore", new ArrayList<String>());
+        } else {
+            map.put("lore", value.getItemMeta().getLore());
+        }
         return map;
     }
 
