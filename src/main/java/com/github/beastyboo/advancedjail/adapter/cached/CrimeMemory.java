@@ -28,7 +28,7 @@ public class CrimeMemory implements CrimeRepository{
 
     public CrimeMemory(AJail core) {
         this.core = core;
-        loadedCrimes = new HashMap<>();
+        loadedCrimes = core.getConfig().crimes();
     }
 
     @Override

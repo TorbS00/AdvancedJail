@@ -1,11 +1,16 @@
 package com.github.beastyboo.advancedjail.adapter.cached;
 
 import com.github.beastyboo.advancedjail.application.AJail;
+import com.github.beastyboo.advancedjail.config.typeadapter.CellTypeAdapter;
+import com.github.beastyboo.advancedjail.config.typeadapter.JailTypeAdapter;
 import com.github.beastyboo.advancedjail.domain.MessageType;
 import com.github.beastyboo.advancedjail.domain.entity.Cell;
 import com.github.beastyboo.advancedjail.domain.entity.Inmate;
 import com.github.beastyboo.advancedjail.domain.entity.Jail;
 import com.github.beastyboo.advancedjail.domain.port.JailRepository;
+import com.github.beastyboo.advancedjail.util.BasicUtil;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldguard.WorldGuard;
@@ -15,6 +20,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.io.File;
 import java.util.*;
 
 /**
@@ -24,20 +30,42 @@ public class JailMemory implements JailRepository{
 
     private final AJail core;
     private final Map<String, Jail> jails;
+    private final Gson gson;
+    private final File folder;
 
     public JailMemory(AJail core) {
         this.core = core;
         jails = new HashMap<>();
+        gson = this.getGson();
+        folder = new File(core.getPlugin().getDataFolder(), "jails");
     }
 
     @Override
     public void load() {
-
+        if(!folder.exists()) {
+            folder.mkdirs();
+        }
+        File[] directoryListing = folder.listFiles();
+        if (directoryListing == null) {
+            return;
+        }
+        for (File child : directoryListing) {
+            String json = BasicUtil.loadContent(child);
+            Jail jail = this.deserialize(json);
+            jails.put(jail.getName().toLowerCase(), jail);
+        }
     }
 
     @Override
     public void close() {
-
+        for(Jail jail : jails.values()) {
+            File file = new File(folder, jail.getName() + ".json");
+            if(!folder.exists()) {
+                folder.mkdirs();
+            }
+            String json = this.serialize(jail);
+            BasicUtil.saveFile(file, json);
+        }
     }
 
     @Override
@@ -86,8 +114,10 @@ public class JailMemory implements JailRepository{
             return false;
         }
 
-        //TODO:
-        //  - delete file.
+        File sourceFile = new File(folder, jail.get().getName() + ".json");
+        if(sourceFile.exists()) {
+            sourceFile.delete();
+        }
 
         for(Inmate inmate : jail.get().getPlayers().values()) {
             Player pInmate = Bukkit.getPlayer(inmate.getUuid());
@@ -213,4 +243,21 @@ public class JailMemory implements JailRepository{
         }
         return new HashSet<>(jail.get().getPlayers().values());
     }
+
+    private Gson getGson() {
+        return new GsonBuilder().registerTypeAdapter(Jail.class, new JailTypeAdapter(core))
+                .setPrettyPrinting()
+                .serializeNulls()
+                .disableHtmlEscaping()
+                .create();
+    }
+
+    private String serialize(Jail value) {
+        return this.gson.toJson(value);
+    }
+
+    private Jail deserialize(String json) {
+        return this.gson.fromJson(json, Jail.class);
+    }
+
 }

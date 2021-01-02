@@ -19,15 +19,20 @@ import java.util.Map;
 @ConfSerialisers({ItemStackValueSerialiser.class, KeyValueSerialiser.class, CrimeValueSerialiser.class, HandcuffValueSerialiser.class})
 public interface ConfigPort {
 
+    @ConfDefault.DefaultString("RoyalCity")
+    @ConfKey("book-signature")
+    @ConfComments({"Represent the signature of the arrest book."})
+    String signature();
+
     @ConfDefault.DefaultBoolean(true)
     @ConfKey("return-inventory-escape")
     @ConfComments({"Represent if a player should get their inventory back when they escape a prison."})
     boolean returnInventoryEscape();
 
-    @ConfDefault.DefaultInteger(60)
+    @ConfDefault.DefaultLong(60)
     @ConfKey("call-cops-cooldown-in-seconds")
     @ConfComments({"Represent the time in seconds for when a jailed player can use broadcast item"})
-    int useBroadcastItem();
+    long useBroadcastItem();
 
     @ConfDefault.DefaultObject("com.github.beastyboo.advancedjail.util.BasicUtil.callCopsItem")
     @ConfKey("broadcast-item")

@@ -30,8 +30,8 @@ public class HandcuffMemory implements HandcuffRepository{
 
     public HandcuffMemory(AJail core) {
         this.core = core;
-        loadedHandcuffs = new HashMap<>();
-        loadedKeys = new HashMap<>();
+        loadedHandcuffs = core.getConfig().handcuffs();
+        loadedKeys = core.getConfig().keys();
         handcuffedPlayers = new HashMap<>();
     }
 

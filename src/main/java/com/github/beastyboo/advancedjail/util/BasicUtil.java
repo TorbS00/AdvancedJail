@@ -21,9 +21,7 @@ import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +35,8 @@ public class BasicUtil {
     private BasicUtil() {
         throw new AssertionError();
     }
+
+
 
     public static String formatTime(int total) {
         int h = (total/3600);
@@ -200,6 +200,43 @@ public class BasicUtil {
         Handcuff handcuff = new Handcuff("handcuff", "In-game handcuff", "jail.handcuff.handcuff", is, true, defaultKey());
         handcuffs.put("handcuff", handcuff);
         return handcuffs;
+    }
+
+    public static void saveFile(File file, String json) {
+        final FileWriter fw;
+        try {
+            file.createNewFile();
+            fw = new FileWriter(file);
+            fw.write(json);
+            fw.flush();
+            fw.close();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+
+        }
+    }
+
+    /**
+     * Loads the json string from a file.
+     */
+    public static String loadContent(File file) {
+        if(file.exists()) {
+            try {
+                final BufferedReader reader = new BufferedReader(new FileReader(file));
+                final  StringBuilder text = new StringBuilder();
+
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+                    text.append(line);
+                }
+                reader.close();
+                return text.toString();
+            } catch (IOException ex) {
+                throw new UncheckedIOException(ex);
+            }
+        }
+        return "";
     }
 
 

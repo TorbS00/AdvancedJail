@@ -2,6 +2,8 @@ package com.github.beastyboo.advancedjail.adapter.cached;
 
 import com.github.beastyboo.advancedjail.application.AJail;
 import com.github.beastyboo.advancedjail.config.JailConfiguration;
+import com.github.beastyboo.advancedjail.config.typeadapter.CellTypeAdapter;
+import com.github.beastyboo.advancedjail.config.typeadapter.InmateTypeAdapter;
 import com.github.beastyboo.advancedjail.domain.MessageType;
 import com.github.beastyboo.advancedjail.domain.entity.Cell;
 import com.github.beastyboo.advancedjail.domain.entity.Crime;
@@ -11,6 +13,8 @@ import com.github.beastyboo.advancedjail.domain.port.InmateRepository;
 import com.github.beastyboo.advancedjail.util.BasicUtil;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -21,6 +25,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.BookMeta;
 
+import java.io.File;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -32,24 +37,45 @@ public class InmateMemory implements InmateRepository {
     private final AJail core;
     private final Map<UUID, Inmate> inmates;
     private final Cache<UUID, Long> cachedCooldown;
-
-    //Make configurable.
-    private final long current = 5;
+    private final long current;
+    private final Gson gson;
+    private final File folder;
 
     public InmateMemory(AJail core) {
         this.core = core;
         inmates = new HashMap<>();
+        current = core.getConfig().useBroadcastItem();
         cachedCooldown = CacheBuilder.newBuilder().expireAfterWrite(current, TimeUnit.MINUTES).build();
+        gson = this.getGson();
+        folder = new File(core.getPlugin().getDataFolder(), "inmates");
     }
 
     @Override
     public void load() {
-
+        if(!folder.exists()) {
+            folder.mkdirs();
+        }
+        File[] directoryListing = folder.listFiles();
+        if (directoryListing == null) {
+            return;
+        }
+        for (File child : directoryListing) {
+            String json = BasicUtil.loadContent(child);
+            Inmate inmate = this.deserialize(json);
+            inmates.put(inmate.getUuid(), inmate);
+        }
     }
 
     @Override
     public void close() {
-
+        for(Inmate inmate : inmates.values()) {
+            File file = new File(folder, inmate.getUuid().toString() + ".json");
+            if(!folder.exists()) {
+                folder.mkdirs();
+            }
+            String json = this.serialize(inmate);
+            BasicUtil.saveFile(file, json);
+        }
     }
 
     @Override
@@ -191,8 +217,11 @@ public class InmateMemory implements InmateRepository {
         JailConfiguration api = core.getAPI();
 
         inv.clear();
-        inv.setArmorContents(inmate.get().getArmorContent());
-        inv.setContents(inmate.get().getInventoryContent());
+
+        if(escaped == false || (escaped && core.getConfig().returnInventoryEscape() == true)) {
+            inv.setArmorContents(inmate.get().getArmorContent());
+            inv.setContents(inmate.get().getInventoryContent());
+        }
 
         Optional<Jail> jail = api.getJailByInmate(uuid);
         Optional<Cell> cell = api.getCellByInmate(uuid);
@@ -214,9 +243,10 @@ public class InmateMemory implements InmateRepository {
             core.message(target, MessageType.TARGET_RELEASE);
         }
 
-        //TODO:
-        //  - delete file.
-        //  - PlayerJoinEvent -> if is not inmate anymore, teleport to spawn.
+        File sourceFile = new File(folder, inmate.get().getUuid().toString() + ".json");
+        if(sourceFile.exists()) {
+            sourceFile.delete();
+        }
 
         if(sender.isPresent()) {
             if(sender.get() instanceof Player) {
@@ -245,10 +275,7 @@ public class InmateMemory implements InmateRepository {
         if(!inmate.isPresent()) {
             return Optional.empty();
         }
-
-
-
-        return null;
+        return Optional.ofNullable(core.getConfig().billItem());
     }
 
     @Override
@@ -257,10 +284,7 @@ public class InmateMemory implements InmateRepository {
         if(!inmate.isPresent()) {
             return Optional.empty();
         }
-
-
-
-        return null;
+        return Optional.ofNullable(core.getConfig().broadcastItem());
     }
 
     @Override
@@ -285,7 +309,7 @@ public class InmateMemory implements InmateRepository {
         ItemStack item = new ItemStack(Material.WRITTEN_BOOK, 1);
         BookMeta bookMeta = (BookMeta) item.getItemMeta();
         bookMeta.setTitle("Identikit di " + target.getName());
-        bookMeta.setAuthor("RoyalCity");
+        bookMeta.setAuthor(core.getConfig().signature());
 
         String split = "\n";
         List<String> pages = new ArrayList<>();
@@ -300,6 +324,22 @@ public class InmateMemory implements InmateRepository {
         bookMeta.setPages(pages);
         item.setItemMeta(bookMeta);
         return item;
+    }
+
+    private Gson getGson() {
+        return new GsonBuilder().registerTypeAdapter(Inmate.class, new InmateTypeAdapter(core))
+                .setPrettyPrinting()
+                .serializeNulls()
+                .disableHtmlEscaping()
+                .create();
+    }
+
+    private String serialize(Inmate value) {
+        return this.gson.toJson(value);
+    }
+
+    private Inmate deserialize(String json) {
+        return this.gson.fromJson(json, Inmate.class);
     }
 
 }
